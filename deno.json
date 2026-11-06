@@ -1,0 +1,14 @@
+{
+  "description": "Checkers PoC: moves derived by SPARQL over an RDF board graph, board reasoning by @wazoo/reasoner.",
+  "version": "0.2.0",
+  "license": "MIT",
+  "imports": {
+    "@wazoo/sparql-engine": "jsr:@wazoo/sparql-engine@0.4.4",
+    "@wazoo/reasoner": "jsr:@wazoo/reasoner@0.4.0"
+  },
+  "tasks": {
+    "demo": "deno run --allow-env=/READABLE_STREAM --allow-read src/demo.ts",
+    "play": "deno run --allow-env=/READABLE_STREAM --allow-read src/play.ts",
+    "test": "deno test --allow-env=/READABLE_STREAM --allow-read tests/"
+  }
+}

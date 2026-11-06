@@ -1,25 +1,25 @@
 # wazoo-checkers
 
-Proof of concept: **checkers with no hand-written move logic.** The board is an
-RDF graph, and every legal move — including forced captures — is *derived* by
-SPARQL `CONSTRUCT` rules at query time. The TypeScript/JS engine is only
-plumbing: it loads triples, runs the rules, and applies the chosen move.
+Proof of concept built **only on the wazoo stack**: the board is an RDF graph
+in a `@wazoo/sparql-engine` `MemoryStore`, every legal move is *derived* by
+SPARQL `CONSTRUCT` rules at query time, and `@wazoo/reasoner` handles the two
+things SPARQL 1.1 cannot — board integrity and recursive reachability.
 
 ```
-positions/*.ttl   board state as triples (squares, pieces, turn)
-rules/*.rq        derivation path 1 — the rulebook in plain SPARQL:
-                    1-simple-move.rq    diagonal forward moves into empty squares
-                    2-jump.rq           jumps over adjacent enemies (kings both ways)
-                    3-forced-capture.rq when a jump exists, only jumps are legal
-shacl/            derivation path 2 — SHACL shapes + rules:
-                    checkers-shapes.ttl validates every position (piece, turn,
-                    occupancy, square-range shapes) AND declares the same move
-                    rules as sh:SPARQLConstructRule, executed by the runner
-src/engine.js     plumbing: load → derive → apply
-src/shacl-engine.js plumbing: validate shapes → run SHACL rules → annotate legality
-src/demo.js       plays a full random game, printing each ply's board,
-                  chosen move, and the provenance triple that justified it
-src/play.js       interactive play
+positions/*.ttl    board state as triples (squares, pieces, turn)
+rules/*.rq         the move rulebook, in SPARQL:
+                     0-adjacency.rq      diagonal adjacency geometry
+                     1-simple-move.rq    diagonal forward moves into empty squares
+                     2-jump.rq           jumps over adjacent enemies (kings both ways)
+                     3-forced-capture.rq when a jump exists, only jumps are legal
+src/engine.ts      plumbing: load → derive → apply (WazooSparqlEngine)
+src/reasoner-layer.ts  @wazoo/reasoner duties:
+                       double-occupancy as an inconsistency rule,
+                       reach-adjacent + reach-transitive = recursive Datalog
+                       materializing the transitive closure (multi-ply
+                       reachability, which SPARQL cannot express)
+src/demo.ts        full random game: board, chosen move, provenance triple,
+                   reasoner consistency + reachability per ply
 ```
 
 Each derived move carries its own justification (`ck:rule`, `ck:because`), so
@@ -27,39 +27,38 @@ Each derived move carries its own justification (`ck:rule`, `ck:because`), so
 
 ## Run it
 
+Requires [Deno](https://deno.com). Packages come from JSR.
+
 ```sh
-npm install
-npm run demo   # full random game with provenance per ply
-npm test       # 11 tests: opening count, forced capture, promotion,
-               # king backward movement, game over, derivation hygiene,
-               # plus SHACL/SPARQL parity and shape-violation rejections
+deno task demo   # full random game with provenance per ply
+deno task test   # 9 tests: opening count, forced capture, promotion,
+                 # king backward movement, game over, derivation hygiene,
+                 # board integrity (clean + violated), recursive reachability
 ```
+
+A 43-ply game runs in about 2.5 seconds end to end.
 
 ## What this demonstrates
 
 - **Declarative rules over a fact graph**: adding a rule is adding a file, not
   editing an engine.
-- **Two derivation paths that must agree**: the same rules live as SPARQL
-  `CONSTRUCT` queries and as SHACL rules over a shapes graph; a test proves
-  both produce identical legal move sets. SHACL additionally validates every
-  position structurally (no double occupancy, squares in range, turn is a
-  real color) before any derivation runs.
+- **The division of labor**: SPARQL derives the one-ply move set (where its
+  joins and filters shine); the reasoner derives the transitive closure and
+  flags integrity violations (what SPARQL 1.1 cannot do — it cannot recurse
+  over its own output). The reasoner's custom Datalog rules are evaluated
+  semi-naively, so `reach-transitive` really does converge.
 - **Non-monotonic state change** (capture removes a piece, promotion flips
-  `ck:king`) — the thing RDF reasoning is often said not to do, done by
-  re-deriving from the fact graph each turn rather than accumulating inferences.
-- **Auditable moves**: every ply prints the provenance triple.
+  `ck:king`) by re-deriving from the fact graph each turn rather than
+  accumulating inferences.
+- **Auditable moves**: every ply prints the provenance triple and the
+  reasoner's consistency verdict.
 
 ## Honest limits (the interesting part)
 
-- SPARQL 1.1 can't recurse over its own output, so **multi-jump chains and
-  lookahead beyond one ply don't derive in a single query**. One ply per turn
-  is where the approach pays off; deeper search belongs in a real engine
-  (the hybrid model). A fun follow-up: materialize derived positions back into
-  the graph and iterate — "breadth-first search, one CONSTRUCT at a time."
-- Derivation takes ~240ms per turn (Comunica, in-memory store). Fine for a
-  demo, slow for a game.
-
-## Related
-
-Built as a demo for wazoo.dev — a knowledge graph where facts go in and
-verifiable answers come out.
+- Reachability is **geometric** (ignores occupancy beyond one ply) — Datalog
+  over triple patterns has no negation, so "empty intermediate square" can't
+  be a premise. One-ply legality stays in SPARQL where `NOT EXISTS` works.
+- OWL 2 RL is monotonic by design: it materializes what the board *is*, not
+  what happens next. State transitions stay re-derivation-based on purpose.
+- Full chess lookahead is still search, not materialization — that part of
+  the hybrid story stands.

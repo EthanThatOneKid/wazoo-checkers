@@ -1,0 +1,19 @@
+# Rule 0: adjacency geometry. Every two diagonally-neighboring squares are
+# ck:adjacent. This is the fact base the reasoner's recursive reachability
+# rule builds on: SPARQL derives the geometry, the reasoner derives the
+# transitive closure (something SPARQL 1.1 cannot do over its own output).
+
+PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+
+CONSTRUCT {
+  ?a ck:adjacent ?b .
+}
+WHERE {
+  VALUES (?dr ?dc) { (1 -1) (1 1) (-1 -1) (-1 1) }
+  ?a ck:row ?r ; ck:col ?c .
+  BIND(?r + ?dr AS ?r2)
+  BIND(?c + ?dc AS ?c2)
+  FILTER(?r2 >= 0 && ?r2 <= 7 && ?c2 >= 0 && ?c2 <= 7)
+  BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r2), "_", STR(?c2))) AS ?b)
+  FILTER EXISTS { ?b ck:row ?z . }
+}

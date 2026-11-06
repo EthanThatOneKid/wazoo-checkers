@@ -1,0 +1,46 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@wazoo/reasoner@0.4.0": "0.4.0",
+    "jsr:@wazoo/sparql-engine@0.4.4": "0.4.4",
+    "npm:@rdfjs/types@^2.0.1": "2.0.1"
+  },
+  "jsr": {
+    "@wazoo/reasoner@0.4.0": {
+      "integrity": "58ab87f4d5572fe8fe32db0c0698b140455aea292edcffc33d7f5e528377db9c",
+      "dependencies": [
+        "jsr:@wazoo/sparql-engine",
+        "npm:@rdfjs/types"
+      ]
+    },
+    "@wazoo/sparql-engine@0.4.4": {
+      "integrity": "a3c88d00fddf13ca078321463e554d52c8d8e8d083adfcd2df08e7b9bd289c53",
+      "dependencies": [
+        "npm:@rdfjs/types"
+      ]
+    }
+  },
+  "npm": {
+    "@rdfjs/types@2.0.1": {
+      "integrity": "sha512-uyAzpugX7KekAXAHq26m3JlUIZJOC0uSBhpnefGV5i15bevDyyejoB7I+9MKeUrzXD8OOUI3+4FeV1wwQr5ihA==",
+      "dependencies": [
+        "@types/node"
+      ]
+    },
+    "@types/node@26.6.6": {
+      "integrity": "sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
+    "undici-types@8.9.0": {
+      "integrity": "sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@wazoo/reasoner@0.4.0",
+      "jsr:@wazoo/sparql-engine@0.4.4"
+    ]
+  }
+}
