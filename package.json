@@ -11,6 +11,9 @@
   "dependencies": {
     "@comunica/query-sparql": "^3.0.0",
     "arrayify-stream": "^2.0.1",
-    "n3": "^1.17.0"
+    "clownface": "^2.0.3",
+    "n3": "^1.17.0",
+    "rdf-ext": "^2.6.0",
+    "rdf-validate-shacl": "^0.6.5"
   }
 }

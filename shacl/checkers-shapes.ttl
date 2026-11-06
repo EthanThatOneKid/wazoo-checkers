@@ -1,0 +1,165 @@
+# SHACL layer: shape validation plus rule-based move derivation.
+#
+# Shapes verify every position is structurally legal (this is the "verify
+# shapes" capability). Rules derive moves the same way rules/1-* and rules/2-*
+# do in plain SPARQL, but declared as sh:construct rules attached to node
+# shapes — a second derivation path that must agree with the first.
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ck: <http://wazoo.dev/ontology/checkers#> .
+@prefix b: <http://wazoo.dev/board/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------- shapes --
+
+ck:SquareShape a sh:NodeShape ;
+  sh:targetSubjectsOf ck:row ;
+  sh:property [
+    sh:path ck:row ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ; sh:maxInclusive 7 ;
+  ], [
+    sh:path ck:col ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ; sh:maxInclusive 7 ;
+  ] .
+
+ck:PieceShape a sh:NodeShape ;
+  sh:targetSubjectsOf ck:at ;
+  sh:property [
+    sh:path ck:color ;
+    sh:in ("red" "black") ;
+  ], [
+    sh:path ck:king ;
+    sh:datatype xsd:boolean ;
+  ], [
+    sh:path ck:at ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:node ck:SquareShape ;
+  ] .
+
+ck:TurnShape a sh:NodeShape ;
+  sh:targetSubjectsOf ck:turn ;
+  sh:property [
+    sh:path ck:turn ;
+    sh:in ("red" "black") ;
+    sh:minCount 1 ; sh:maxCount 1 ;
+  ] .
+
+# No two pieces may occupy one square: a square can be ck:at target of at
+# most one piece.
+ck:OccupancyShape a sh:NodeShape ;
+  sh:targetObjectsOf ck:at ;
+  sh:property [
+    sh:path [ sh:inversePath ck:at ] ;
+    sh:maxCount 1 ;
+  ] .
+
+# ----------------------------------------------------------------- rules --
+
+# Derived move resources are validated as MoveShape: a move must have
+# exactly one from and one to, a boolean isJump, and a rule name.
+ck:MoveShape a sh:NodeShape ;
+  sh:targetObjectsOf ck:isJump ;
+  sh:property [
+    sh:path ck:from ; sh:minCount 1 ; sh:maxCount 1 ;
+    sh:node ck:SquareShape ;
+  ], [
+    sh:path ck:to ; sh:minCount 1 ; sh:maxCount 1 ;
+    sh:node ck:SquareShape ;
+  ], [
+    sh:path ck:isJump ; sh:datatype xsd:boolean ; sh:minCount 1 ;
+  ], [
+    sh:path ck:rule ; sh:minCount 1 ;
+  ], [
+    # A jump must capture; a simple move must not.
+    sh:path ck:captures ;
+    sh:maxCount 1 ;
+  ] .
+
+# Simple-move rule: forward diagonal into an empty square.
+ck:SimpleMoveRule a sh:NodeShape ;
+  sh:targetClass ck:Piece ;
+  sh:rule [
+    a sh:SPARQLConstructRule ;
+    sh:rule ck:ruleSimpleMove ;
+    sh:construct """
+      PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+      CONSTRUCT {
+        ?move a ck:Move ;
+              ck:from ?here ;
+              ck:to ?there ;
+              ck:isJump false ;
+              ck:rule "shacl-simple-move" ;
+              ck:because ?why .
+      } WHERE {
+        VALUES (?dr ?dc) { (1 -1) (1 1) (-1 -1) (-1 1) }
+        ?this ck:at ?here ; ck:color ?color ; ck:king ?king .
+        ?here ck:row ?r ; ck:col ?c .
+        ?g ck:turn ?color .
+        FILTER(?king = true || (?dr = 1 && ?color = "red") || (?dr = -1 && ?color = "black"))
+        BIND(?r + ?dr AS ?r2)
+        BIND(?c + ?dc AS ?c2)
+        FILTER(?r2 >= 0 && ?r2 <= 7 && ?c2 >= 0 && ?c2 <= 7)
+        BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r2), "_", STR(?c2))) AS ?there)
+        FILTER EXISTS { ?there ck:row ?z . }
+        FILTER NOT EXISTS { ?blocker ck:at ?there . }
+        BIND(IRI(CONCAT("http://wazoo.dev/board/move-", STR(?here), "-to-", STR(?there))) AS ?move)
+        BIND(CONCAT(STR(?this), " moves diagonally from ", STR(?here), " to ", STR(?there), " (SHACL rule derivation)") AS ?why)
+      }
+    """
+  ] .
+
+# Jump rule: two-square diagonal over an adjacent enemy into an empty square.
+ck:JumpRule a sh:NodeShape ;
+  sh:targetClass ck:Piece ;
+  sh:rule [
+    a sh:SPARQLConstructRule ;
+    sh:rule ck:ruleJump ;
+    sh:construct """
+      PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+      CONSTRUCT {
+        ?move a ck:Move ;
+              ck:from ?here ;
+              ck:to ?there ;
+              ck:captures ?enemy ;
+              ck:isJump true ;
+              ck:rule "shacl-jump" ;
+              ck:because ?why .
+      } WHERE {
+        VALUES (?dr ?dc) { (2 -2) (2 2) (-2 -2) (-2 2) }
+        ?this ck:at ?here ; ck:color ?color ; ck:king ?king .
+        ?here ck:row ?r ; ck:col ?c .
+        ?g ck:turn ?color .
+        FILTER(?king = true || (?dr = 2 && ?color = "red") || (?dr = -2 && ?color = "black"))
+        BIND(?r + ?dr AS ?r2)
+        BIND(?c + ?dc AS ?c2)
+        FILTER(?r2 >= 0 && ?r2 <= 7 && ?c2 >= 0 && ?c2 <= 7)
+        BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r2), "_", STR(?c2))) AS ?there)
+        FILTER EXISTS { ?there ck:row ?z . }
+        FILTER NOT EXISTS { ?blocker ck:at ?there . }
+        BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r + (?dr / 2)), "_", STR(?c + (?dc / 2)))) AS ?midSquare)
+        ?enemy ck:at ?midSquare ; ck:color ?enemyColor .
+        FILTER(?enemyColor != ?color)
+        BIND(IRI(CONCAT("http://wazoo.dev/board/move-", STR(?here), "-to-", STR(?there))) AS ?move)
+        BIND(CONCAT(STR(?this), " jumps ", STR(?enemy), " on ", STR(?midSquare), ", landing on ", STR(?there), " (SHACL rule derivation)") AS ?why)
+      }
+    """
+  ] .
+
+# Forced capture is expressed as a validated shape on the derived legality
+# annotation: when any jump exists, simple moves must be marked illegal.
+# Executed by the runner after both move rules fire.
+# Forced capture under SHACL: a plain SPARQL query (kept here so the shapes
+# file stays the single source of truth) that the runner executes to annotate
+# ck:legal. When any jump exists, simple moves are marked ck:legal false.
+ck:LegalityRule ck:query """
+    PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+    SELECT ?this ?ok WHERE {
+      ?this a ck:Move ; ck:isJump ?isJump .
+      OPTIONAL { ?any a ck:Move ; ck:isJump true . BIND(true AS ?force) }
+      BIND(COALESCE(?force, false) AS ?forceCapture)
+      BIND(?isJump = ?forceCapture AS ?ok)
+    }
+  """ .

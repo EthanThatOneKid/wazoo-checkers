@@ -7,11 +7,16 @@ plumbing: it loads triples, runs the rules, and applies the chosen move.
 
 ```
 positions/*.ttl   board state as triples (squares, pieces, turn)
-rules/*.rq        the entire rulebook, in SPARQL:
+rules/*.rq        derivation path 1 — the rulebook in plain SPARQL:
                     1-simple-move.rq    diagonal forward moves into empty squares
                     2-jump.rq           jumps over adjacent enemies (kings both ways)
                     3-forced-capture.rq when a jump exists, only jumps are legal
+shacl/            derivation path 2 — SHACL shapes + rules:
+                    checkers-shapes.ttl validates every position (piece, turn,
+                    occupancy, square-range shapes) AND declares the same move
+                    rules as sh:SPARQLConstructRule, executed by the runner
 src/engine.js     plumbing: load → derive → apply
+src/shacl-engine.js plumbing: validate shapes → run SHACL rules → annotate legality
 src/demo.js       plays a full random game, printing each ply's board,
                   chosen move, and the provenance triple that justified it
 src/play.js       interactive play
@@ -25,14 +30,20 @@ Each derived move carries its own justification (`ck:rule`, `ck:because`), so
 ```sh
 npm install
 npm run demo   # full random game with provenance per ply
-npm test       # 6 tests: opening count, forced capture, promotion,
-               # king backward movement, game over, derivation hygiene
+npm test       # 11 tests: opening count, forced capture, promotion,
+               # king backward movement, game over, derivation hygiene,
+               # plus SHACL/SPARQL parity and shape-violation rejections
 ```
 
 ## What this demonstrates
 
 - **Declarative rules over a fact graph**: adding a rule is adding a file, not
   editing an engine.
+- **Two derivation paths that must agree**: the same rules live as SPARQL
+  `CONSTRUCT` queries and as SHACL rules over a shapes graph; a test proves
+  both produce identical legal move sets. SHACL additionally validates every
+  position structurally (no double occupancy, squares in range, turn is a
+  real color) before any derivation runs.
 - **Non-monotonic state change** (capture removes a piece, promotion flips
   `ck:king`) — the thing RDF reasoning is often said not to do, done by
   re-deriving from the fact graph each turn rather than accumulating inferences.

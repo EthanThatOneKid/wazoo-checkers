@@ -1,0 +1,6 @@
+@prefix ck: <http://wazoo.dev/ontology/checkers#> .
+@prefix b: <http://wazoo.dev/board/> .
+
+b:game ck:turn "red" .
+b:s9_1 ck:row 9 ; ck:col 1 .
+ck:prA ck:color "red" ; ck:king false ; ck:at b:s9_1 .
