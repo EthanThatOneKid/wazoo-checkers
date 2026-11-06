@@ -1,0 +1,70 @@
+# All 64 squares, generated once. Dark squares are the playable ones; the
+# derivation rules rely on every square existing so empty destinations bind.
+
+@prefix ck: <http://wazoo.dev/ontology/checkers#> .
+@prefix b: <http://wazoo.dev/board/> .
+
+b:s0_0 ck:row 0 ; ck:col 0 .
+b:s0_1 ck:row 0 ; ck:col 1 .
+b:s0_2 ck:row 0 ; ck:col 2 .
+b:s0_3 ck:row 0 ; ck:col 3 .
+b:s0_4 ck:row 0 ; ck:col 4 .
+b:s0_5 ck:row 0 ; ck:col 5 .
+b:s0_6 ck:row 0 ; ck:col 6 .
+b:s0_7 ck:row 0 ; ck:col 7 .
+b:s1_0 ck:row 1 ; ck:col 0 .
+b:s1_1 ck:row 1 ; ck:col 1 .
+b:s1_2 ck:row 1 ; ck:col 2 .
+b:s1_3 ck:row 1 ; ck:col 3 .
+b:s1_4 ck:row 1 ; ck:col 4 .
+b:s1_5 ck:row 1 ; ck:col 5 .
+b:s1_6 ck:row 1 ; ck:col 6 .
+b:s1_7 ck:row 1 ; ck:col 7 .
+b:s2_0 ck:row 2 ; ck:col 0 .
+b:s2_1 ck:row 2 ; ck:col 1 .
+b:s2_2 ck:row 2 ; ck:col 2 .
+b:s2_3 ck:row 2 ; ck:col 3 .
+b:s2_4 ck:row 2 ; ck:col 4 .
+b:s2_5 ck:row 2 ; ck:col 5 .
+b:s2_6 ck:row 2 ; ck:col 6 .
+b:s2_7 ck:row 2 ; ck:col 7 .
+b:s3_0 ck:row 3 ; ck:col 0 .
+b:s3_1 ck:row 3 ; ck:col 1 .
+b:s3_2 ck:row 3 ; ck:col 2 .
+b:s3_3 ck:row 3 ; ck:col 3 .
+b:s3_4 ck:row 3 ; ck:col 4 .
+b:s3_5 ck:row 3 ; ck:col 5 .
+b:s3_6 ck:row 3 ; ck:col 6 .
+b:s3_7 ck:row 3 ; ck:col 7 .
+b:s4_0 ck:row 4 ; ck:col 0 .
+b:s4_1 ck:row 4 ; ck:col 1 .
+b:s4_2 ck:row 4 ; ck:col 2 .
+b:s4_3 ck:row 4 ; ck:col 3 .
+b:s4_4 ck:row 4 ; ck:col 4 .
+b:s4_5 ck:row 4 ; ck:col 5 .
+b:s4_6 ck:row 4 ; ck:col 6 .
+b:s4_7 ck:row 4 ; ck:col 7 .
+b:s5_0 ck:row 5 ; ck:col 0 .
+b:s5_1 ck:row 5 ; ck:col 1 .
+b:s5_2 ck:row 5 ; ck:col 2 .
+b:s5_3 ck:row 5 ; ck:col 3 .
+b:s5_4 ck:row 5 ; ck:col 4 .
+b:s5_5 ck:row 5 ; ck:col 5 .
+b:s5_6 ck:row 5 ; ck:col 6 .
+b:s5_7 ck:row 5 ; ck:col 7 .
+b:s6_0 ck:row 6 ; ck:col 0 .
+b:s6_1 ck:row 6 ; ck:col 1 .
+b:s6_2 ck:row 6 ; ck:col 2 .
+b:s6_3 ck:row 6 ; ck:col 3 .
+b:s6_4 ck:row 6 ; ck:col 4 .
+b:s6_5 ck:row 6 ; ck:col 5 .
+b:s6_6 ck:row 6 ; ck:col 6 .
+b:s6_7 ck:row 6 ; ck:col 7 .
+b:s7_0 ck:row 7 ; ck:col 0 .
+b:s7_1 ck:row 7 ; ck:col 1 .
+b:s7_2 ck:row 7 ; ck:col 2 .
+b:s7_3 ck:row 7 ; ck:col 3 .
+b:s7_4 ck:row 7 ; ck:col 4 .
+b:s7_5 ck:row 7 ; ck:col 5 .
+b:s7_6 ck:row 7 ; ck:col 6 .
+b:s7_7 ck:row 7 ; ck:col 7 .

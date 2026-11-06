@@ -1,0 +1,16 @@
+{
+  "name": "wazoo-checkers",
+  "version": "0.1.0",
+  "description": "Proof of concept: checkers move legality and state transitions derived by SPARQL over an RDF board graph.",
+  "type": "module",
+  "scripts": {
+    "demo": "node src/demo.js",
+    "play": "node src/play.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@comunica/query-sparql": "^3.0.0",
+    "arrayify-stream": "^2.0.1",
+    "n3": "^1.17.0"
+  }
+}

@@ -1,0 +1,37 @@
+# Initial checkers position.
+# Red moves toward increasing row (rows 0-2), black toward decreasing row (rows 5-7).
+# Board squares are dark squares of an 8x8 board; only dark squares are modelled.
+
+@prefix ck: <http://wazoo.dev/ontology/checkers#> .
+@prefix b: <http://wazoo.dev/board/> .
+
+b:game ck:turn "red" .
+
+# Squares r0..r7, c0..c7 (all, for empty-square checks during derivation).
+# Red pieces
+ck:pr1 ck:color "red" ; ck:king false ; ck:at b:s2_1 .
+ck:pr2 ck:color "red" ; ck:king false ; ck:at b:s2_3 .
+ck:pr3 ck:color "red" ; ck:king false ; ck:at b:s2_5 .
+ck:pr4 ck:color "red" ; ck:king false ; ck:at b:s2_7 .
+ck:pr5 ck:color "red" ; ck:king false ; ck:at b:s1_0 .
+ck:pr6 ck:color "red" ; ck:king false ; ck:at b:s1_2 .
+ck:pr7 ck:color "red" ; ck:king false ; ck:at b:s1_4 .
+ck:pr8 ck:color "red" ; ck:king false ; ck:at b:s1_6 .
+ck:pr9  ck:color "red" ; ck:king false ; ck:at b:s0_1 .
+ck:pr10 ck:color "red" ; ck:king false ; ck:at b:s0_3 .
+ck:pr11 ck:color "red" ; ck:king false ; ck:at b:s0_5 .
+ck:pr12 ck:color "red" ; ck:king false ; ck:at b:s0_7 .
+
+# Black pieces
+ck:pb1 ck:color "black" ; ck:king false ; ck:at b:s5_0 .
+ck:pb2 ck:color "black" ; ck:king false ; ck:at b:s5_2 .
+ck:pb3 ck:color "black" ; ck:king false ; ck:at b:s5_4 .
+ck:pb4 ck:color "black" ; ck:king false ; ck:at b:s5_6 .
+ck:pb5 ck:color "black" ; ck:king false ; ck:at b:s6_1 .
+ck:pb6 ck:color "black" ; ck:king false ; ck:at b:s6_3 .
+ck:pb7 ck:color "black" ; ck:king false ; ck:at b:s6_5 .
+ck:pb8 ck:color "black" ; ck:king false ; ck:at b:s6_7 .
+ck:pb9  ck:color "black" ; ck:king false ; ck:at b:s7_0 .
+ck:pb10 ck:color "black" ; ck:king false ; ck:at b:s7_2 .
+ck:pb11 ck:color "black" ; ck:king false ; ck:at b:s7_4 .
+ck:pb12 ck:color "black" ; ck:king false ; ck:at b:s7_6 .

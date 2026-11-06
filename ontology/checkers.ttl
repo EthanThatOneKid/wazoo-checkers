@@ -1,0 +1,53 @@
+# Checkers ontology: board, pieces, and derived moves.
+# IRIs use the ck: prefix defined in every rule file.
+
+@prefix ck: <http://wazoo.dev/ontology/checkers#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ck:Square a rdfs:Class ;
+  rdfs:label "A playable square, identified by zero-based row and column." .
+
+ck:Piece a rdfs:Class ;
+  rdfs:label "A checker piece." .
+
+ck:Move a rdfs:Class ;
+  rdfs:label "A move derived by rule from the current position." .
+
+ck:row a rdfs:Property ;
+  rdfs:label "Zero-based row of a square." .
+
+ck:col a rdfs:Property ;
+  rdfs:label "Zero-based column of a square." .
+
+ck:at a rdfs:Property ;
+  rdfs:label "Links a piece to the square it currently occupies." .
+
+ck:color a rdfs:Property ;
+  rdfs:label "Piece or side color: red or black. Red moves toward increasing row." .
+
+ck:king a rdfs:Property ;
+  rdfs:label "True when the piece is a king and may move in both directions." .
+
+ck:turn a rdfs:Property ;
+  rdfs:label "Which color must move in the current position." .
+
+ck:from a rdfs:Property ;
+  rdfs:label "Derived move: origin square." .
+
+ck:to a rdfs:Property ;
+  rdfs:label "Derived move: destination square." .
+
+ck:captures a rdfs:Property ;
+  rdfs:label "Derived move: piece captured by a jump." .
+
+ck:isJump a rdfs:Property ;
+  rdfs:label "Derived move: true for a jump over an enemy piece." .
+
+ck:legal a rdfs:Property ;
+  rdfs:label "Derived move: true when the move may be played (forced-capture rule applied)." .
+
+ck:rule a rdfs:Property ;
+  rdfs:label "Derived move: name of the rule that derived it, for provenance." .
+
+ck:because a rdfs:Property ;
+  rdfs:label "Derived move: human-readable justification for provenance." .

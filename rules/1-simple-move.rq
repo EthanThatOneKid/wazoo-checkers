@@ -1,0 +1,31 @@
+# Rule 1: simple diagonal move. A piece of the color to move may move one
+# square diagonally forward (both directions for kings) into an empty square.
+# Directions come from a small VALUES table instead of a cross join over all
+# squares, which keeps Comunica's join planning fast.
+
+PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+
+CONSTRUCT {
+  ?move a ck:Move ;
+        ck:from ?here ;
+        ck:to ?there ;
+        ck:isJump false ;
+        ck:rule "simple-move" ;
+        ck:because ?why .
+}
+WHERE {
+  VALUES (?dr ?dc) { (1 -1) (1 1) (-1 -1) (-1 1) }
+  ?piece ck:at ?here ; ck:color ?color ; ck:king ?king .
+  ?here ck:row ?r ; ck:col ?c .
+  ?g ck:turn ?color .
+  # Men move forward only; kings move both ways.
+  FILTER(?king = true || (?dr = 1 && ?color = "red") || (?dr = -1 && ?color = "black"))
+  BIND(?r + ?dr AS ?r2)
+  BIND(?c + ?dc AS ?c2)
+  FILTER(?r2 >= 0 && ?r2 <= 7 && ?c2 >= 0 && ?c2 <= 7)
+  BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r2), "_", STR(?c2))) AS ?there)
+  FILTER EXISTS { ?there ck:row ?z . }
+  FILTER NOT EXISTS { ?blocker ck:at ?there . }
+  BIND(IRI(CONCAT("http://wazoo.dev/board/move-", STR(?here), "-to-", STR(?there))) AS ?move)
+  BIND(CONCAT(STR(?piece), " moves diagonally from ", STR(?here), " to ", STR(?there), " (empty square, forward direction ok)") AS ?why)
+}

@@ -1,0 +1,33 @@
+# Rule 2: jump (capture). A piece may jump two squares diagonally over an
+# adjacent enemy piece into an empty square. Men jump forward only; kings
+# jump in both directions.
+
+PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+
+CONSTRUCT {
+  ?move a ck:Move ;
+        ck:from ?here ;
+        ck:to ?there ;
+        ck:captures ?enemy ;
+        ck:isJump true ;
+        ck:rule "jump" ;
+        ck:because ?why .
+}
+WHERE {
+  VALUES (?dr ?dc) { (2 -2) (2 2) (-2 -2) (-2 2) }
+  ?piece ck:at ?here ; ck:color ?color ; ck:king ?king .
+  ?here ck:row ?r ; ck:col ?c .
+  ?g ck:turn ?color .
+  FILTER(?king = true || (?dr = 2 && ?color = "red") || (?dr = -2 && ?color = "black"))
+  BIND(?r + ?dr AS ?r2)
+  BIND(?c + ?dc AS ?c2)
+  FILTER(?r2 >= 0 && ?r2 <= 7 && ?c2 >= 0 && ?c2 <= 7)
+  BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r2), "_", STR(?c2))) AS ?there)
+  FILTER EXISTS { ?there ck:row ?z . }
+  FILTER NOT EXISTS { ?blocker ck:at ?there . }
+  BIND(IRI(CONCAT("http://wazoo.dev/board/s", STR(?r + (?dr / 2)), "_", STR(?c + (?dc / 2)))) AS ?midSquare)
+  ?enemy ck:at ?midSquare ; ck:color ?enemyColor .
+  FILTER(?enemyColor != ?color)
+  BIND(IRI(CONCAT("http://wazoo.dev/board/move-", STR(?here), "-to-", STR(?there))) AS ?move)
+  BIND(CONCAT(STR(?piece), " jumps ", STR(?enemy), " on ", STR(?midSquare), ", landing on ", STR(?there)) AS ?why)
+}

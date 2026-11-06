@@ -1,0 +1,15 @@
+# Rule 3: forced capture and legality. When at least one jump exists for the
+# color to move, only jumps are legal; otherwise simple moves are legal.
+# Materialized as ck:legal annotations on the derived moves.
+
+PREFIX ck: <http://wazoo.dev/ontology/checkers#>
+
+CONSTRUCT {
+  ?move ck:legal ?isLegal .
+}
+WHERE {
+  ?move a ck:Move ; ck:isJump ?isJump .
+  OPTIONAL { ?any a ck:Move ; ck:isJump true . BIND(true AS ?force) }
+  BIND(COALESCE(?force, false) AS ?forceCapture)
+  BIND(?isJump = ?forceCapture AS ?isLegal)
+}
