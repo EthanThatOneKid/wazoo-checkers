@@ -50,25 +50,9 @@ export function buildBoardReasoner(): Reasoner {
   } as never);
 }
 
-/** spe terms lack RDF/JS equals(); the reasoner's engine calls it. */
-function adaptQuad(q: RdfQuad): RdfQuad {
-  const eq = (a: { value: string }) => (b: { value: string }) => a.value === b.value;
-  const wrap = (t: unknown): unknown => {
-    const term = t as { value: string } & Record<string, unknown>;
-    return "equals" in term ? term : { ...term, equals: eq(term) };
-  };
-  const quad = q as unknown as Record<string, unknown>;
-  return {
-    ...quad,
-    subject: wrap(quad.subject),
-    predicate: wrap(quad.predicate),
-    object: wrap(quad.object),
-  } as RdfQuad;
-}
-
 function boardReasoner(quads: Iterable<RdfQuad>): Reasoner {
   const reasoner = buildBoardReasoner();
-  reasoner.add([...quads].map(adaptQuad) as never);
+  reasoner.add(quads as never);
   reasoner.run();
   return reasoner;
 }
